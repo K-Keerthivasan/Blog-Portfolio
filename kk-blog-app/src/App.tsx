@@ -1,34 +1,39 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useState } from "react";
+import { ThemeProvider, CssBaseline } from "@mui/material";
 import './App.css'
+import Navbar from "./frontend/Navbar.tsx";
+import Home from "./frontend/Home.tsx";
+import Footer from "./frontend/Footer.tsx";
+import { darkTheme, lightTheme } from "./frontend/theme.tsx";
+import ThemeTesterText from "./frontend/Testing/ThemeTesterText.tsx";
+import ComponentsTester from "./frontend/Testing/ComponentsTester.tsx";
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  const [isDarkMode, setIsDarkMode] = useState(true); // ✅ Default to dark mode
+
+  const toggleTheme = () => setIsDarkMode(!isDarkMode);
+
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+<div>
+  <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
+    <CssBaseline />
+  <Router>
+
+    <Navbar toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
+  <Routes >
+    <Route path="/" element={<Home/>}/>
+    <Route path="/text-tester" element={<ThemeTesterText/>}/>
+    <Route path="/design-tester" element={<ComponentsTester/>}/>
+  </Routes>
+</Router>
+
+<Footer />
+
+  </ThemeProvider>
+</div>
   )
 }
 
