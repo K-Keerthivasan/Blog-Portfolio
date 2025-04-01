@@ -24,6 +24,7 @@ const ThemeTesterText: React.FC = () => {
 
                 <Divider sx={{ my: 3 }} />
 
+
                 {/* Body Text */}
                 <Typography variant="body1" gutterBottom>
                     This is body1 text. It’s typically used for longer content paragraphs and normal reading.
