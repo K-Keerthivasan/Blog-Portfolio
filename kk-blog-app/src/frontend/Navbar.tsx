@@ -15,6 +15,7 @@ import {
 
 } from "@mui/material";
 
+import AdminSidebar from "../backend/Admin/AdminSidebar.tsx"; // update path if needed
 import MenuIcon from "@mui/icons-material/Menu";
 import HomeIcon from "@mui/icons-material/Home";
 import LightModeIcon from "@mui/icons-material/LightMode";
@@ -25,7 +26,7 @@ import MovieFilterIcon from "@mui/icons-material/MovieFilter";
 import BrushIcon from "@mui/icons-material/Brush";
 import {useState} from "react";
 
-import {Link} from "react-router-dom";
+import {Link, useLocation} from "react-router-dom";
 
 type NavbarProps = {
     toggleTheme: () => void;
@@ -48,8 +49,16 @@ const filmItems = [
     {name: "VFX", icon: <BrushIcon/>},
 ];
 
+
+
 const Navbar = ({toggleTheme, isDarkMode}: NavbarProps) => {
     const [drawerOpen, setDrawerOpen] = useState(false);
+
+    const location = useLocation();
+
+
+    const isAdminRoute = location.pathname.startsWith("/admin");
+
 
     const toggleDrawer = (open: boolean) => () => {
         setDrawerOpen(open);
@@ -95,59 +104,67 @@ const Navbar = ({toggleTheme, isDarkMode}: NavbarProps) => {
 
             {/* Sidebar Drawer */}
             <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
-                <Box sx={{width: 250}} role="presentation" onClick={toggleDrawer(false)}>
-                    {/* Tech Section */}
-                    <Typography
-                        variant="subtitle2"
-                        sx={(theme) => ({
-                            px: 2,
-                            pt: 1,
-                            fontWeight: 600,
-                            fontSize: "18px",
-                            color: theme.palette.mode === "dark" ? "#90caf9" : "#1976d2", // dark → light blue, light → deep blue
-                        })}
-                    >
-                        Tech
-                    </Typography>
-
-                    <List>
-                        {techItems.map((item) => (
-                            <ListItemButton
-                                key={item.name}
-                                component={Link}
-                                to={`/${item.name.toLowerCase().replace(" ", "-")}`}
+                <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
+                    {isAdminRoute ? (
+                        <AdminSidebar currentPage={"dashboard"} setPage={() => {}} />
+                    ) : (
+                        <>
+                            {/* Tech Section */}
+                            <Typography
+                                variant="subtitle2"
+                                sx={(theme) => ({
+                                    px: 2,
+                                    pt: 1,
+                                    fontWeight: 600,
+                                    fontSize: "18px",
+                                    color: theme.palette.mode === "dark" ? "#90caf9" : "#1976d2",
+                                })}
                             >
-                                <ListItemIcon>{item.icon}</ListItemIcon>
-                                <ListItemText primary={item.name}/>
-                            </ListItemButton>
-                        ))}
-                    </List>
+                                Tech
+                            </Typography>
 
-                    <Divider/>
+                            <List>
+                                {techItems.map((item) => (
+                                    <ListItemButton
+                                        key={item.name}
+                                        component={Link}
+                                        to={`/${item.name.toLowerCase().replace(" ", "-")}`}
+                                    >
+                                        <ListItemIcon>{item.icon}</ListItemIcon>
+                                        <ListItemText primary={item.name} />
+                                    </ListItemButton>
+                                ))}
+                            </List>
 
-                    {/* Film Section */}
-                    <Typography
-                        variant="subtitle2"
-                        sx={(theme) => ({
-                            px: 2,
-                            pt: 1,
-                            fontWeight: 600,
-                            fontSize: "18px",
-                            color: theme.palette.mode === "dark" ? "#f99090" : "#d21919", // dark → light blue, light → deep blue
-                        })}
-                    >
-                        Film
-                    </Typography>
-                    <List>
-                        {filmItems.map((item) => (
-                            <ListItemButton key={item.name}>
-                                <ListItemIcon>{item.icon}</ListItemIcon>
-                                <ListItemText primary={item.name}/>
-                            </ListItemButton>
-                        ))}
-                    </List>
+                            <Divider />
+
+                            {/* Film Section */}
+                            <Typography
+                                variant="subtitle2"
+                                sx={(theme) => ({
+                                    px: 2,
+                                    pt: 1,
+                                    fontWeight: 600,
+                                    fontSize: "18px",
+                                    color: theme.palette.mode === "dark" ? "#f99090" : "#d21919",
+                                })}
+                            >
+                                Film
+                            </Typography>
+
+                            <List>
+                                {filmItems.map((item) => (
+                                    <ListItemButton key={item.name}>
+                                        <ListItemIcon>{item.icon}</ListItemIcon>
+                                        <ListItemText primary={item.name} />
+                                    </ListItemButton>
+                                ))}
+                            </List>
+                        </>
+                    )}
                 </Box>
             </Drawer>
+
         </Box>
     );
 };

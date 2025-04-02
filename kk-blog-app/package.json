@@ -21,9 +21,11 @@
     "@mui/system": "^7.0.1",
     "@tldraw/tldraw": "^3.11.0",
     "firebase": "^11.5.0",
+    "googleapis": "^148.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-firebase-hooks": "^5.1.1",
+    "react-quill": "^2.0.0",
     "react-router-dom": "^7.4.1"
   },
   "devDependencies": {

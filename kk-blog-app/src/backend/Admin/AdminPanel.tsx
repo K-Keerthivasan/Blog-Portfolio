@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { getAuth, signOut } from "firebase/auth";
+import {signOut } from "firebase/auth";
 import { Box, Button, Typography } from "@mui/material";
 import Dashboard from "./Dashboard.tsx";
-import PostManager from "./PostManager.tsx";
+import PostList from "../post/PostList.tsx";
+
 
 
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "./firebaseConfig.tsx"; // assuming you exported it properly
+import { auth } from "../firebaseConfig.tsx";
+import CreatePost from "../post/CreatePost.tsx"; // assuming you exported it properly
 
 const AdminPanel: React.FC = () => {
     const [page] = useState("dashboard");
@@ -32,10 +34,16 @@ const AdminPanel: React.FC = () => {
         <Box>
 
             {/* Main Content */}
-            <Box sx={{ padding: 5, flexGrow: 1 ,    }}>
+            <Box sx={{ padding: 5, flexGrow: 1 }}>
                 {page === "dashboard" && <Dashboard />}
-                 {page === "manage-project" && <PostManager />}
+                {page === "web-dev-post" && <PostList collectionName="web_dev_collection" />}
+                {page === "game-dev" && <PostList collectionName="game_dev_collection" />}
+                {page === "editing" && <PostList collectionName="editing_collection" />}
+                {page === "vfx" && <PostList collectionName="visual_effects_collection" />}
+                {page === "create-post" && <CreatePost />}
+
             </Box>
+
 
             {/* Logout Button */}
             <Button

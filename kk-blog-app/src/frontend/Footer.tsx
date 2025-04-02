@@ -1,59 +1,56 @@
-import {AppBar, Toolbar, Typography, IconButton,Box} from "@mui/material";
+import { Box, Toolbar, Typography, IconButton, useTheme } from "@mui/material";
 import CodeOffIcon from '@mui/icons-material/CodeOff';
 
-
 const Footer = () => {
-    return (
+    const theme = useTheme(); // ✅ Access current theme
 
-        <AppBar position="relative" color="primary"
-                component="footer"
-                sx={{
-                    display: 'flex',
-                    flexDirection: {xs: 'column', md: 'row'},
-                    padding: 0,
-                    borderRadius: 0,
-                    width: '100%',
-                }}>
+    return (
+        <Box
+            component="footer"
+            sx={{
+                width: "100%",
+                mt: "auto",
+                backgroundColor: theme.palette.background.paper,
+                color: theme.palette.text.primary,
+            }}
+        >
             <Toolbar
                 sx={{
                     width: "100%",
                     display: "flex",
                     flexDirection: "row",
                     alignItems: "center",
-                    justifyContent: "space-between", // Ensures proper spacing in desktop
+                    justifyContent: "space-between",
                     textAlign: "center",
-                    gap: { xs: "10px", md: "0" }, // Adds spacing in mobile
+                    gap: { xs: "10px", md: "0" },
                 }}
             >
-                <Typography variant="h6"
-                            sx={{
-                                textAlign: { xs: "center", md: "left" },
-                                fontSize: { xs: "12px", md: "16px" },
-                                width: "100%",
-                            }}
+                <Typography
+                    variant="h6"
+                    sx={{
+                        textAlign: { xs: "center", md: "left" },
+                        fontSize: { xs: "12px", md: "16px" },
+                        width: "100%",
+                    }}
                 >
-
                     Designed and Developed By KK
-
                 </Typography>
 
-
-                {/* Right Section */}
-                <Box sx={{
-                    display: "flex",
-                    justifyContent: { xs: "center", md: "flex-end" },  // Aligns icons to the right
-                    alignItems: "center",
-                    gap: "5px",
-                    width: "100%", // Ensures alignment works
-                    maxWidth: "200px", // Prevents excessive spacing on large screens
-
-                }}>
-                    {/* Portfolio Link */}
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: { xs: "center", md: "flex-end" },
+                        alignItems: "center",
+                        gap: "5px",
+                        width: "100%",
+                        maxWidth: "200px",
+                    }}
+                >
                     <a
                         href="https://kk-dev-portfolio.web.app/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{ textDecoration: 'none' }}
+                        style={{ textDecoration: "none" }}
                     >
                         <IconButton
                             sx={{
@@ -67,14 +64,9 @@ const Footer = () => {
                             <CodeOffIcon />
                         </IconButton>
                     </a>
-
                 </Box>
-
-
-
             </Toolbar>
-        </AppBar>
-
+        </Box>
     );
 };
 
