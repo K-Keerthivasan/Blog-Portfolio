@@ -1,4 +1,3 @@
-// pages/EditPost.tsx
 import { useEffect, useState } from "react";
 import {
     doc,
@@ -21,6 +20,14 @@ import {
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
+// 📹 Converts YouTube URL to embed format
+const convertYouTubeUrlToEmbed = (url: string) => {
+    const match = url.match(
+        /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/
+    );
+    return match ? `https://www.youtube.com/embed/${match[1]}` : "";
+};
+
 const quillModules = {
     toolbar: [
         [{ header: [1, 2, 3, false] }],
@@ -38,6 +45,8 @@ const EditPostCollection = () => {
     const [title, setTitle] = useState("");
     const [thumbnailUrl, setThumbnailUrl] = useState("");
     const [content, setContent] = useState("");
+    const [videoUrl, setVideoUrl] = useState("");
+    const [imageLink, setImageLink] = useState("");
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -53,6 +62,22 @@ const EditPostCollection = () => {
         };
         fetchPost();
     }, [collectionName, postId]);
+
+    const handleInsertMedia = () => {
+        let html = "";
+        if (imageLink) {
+            html += `<img src="${imageLink}" alt="Image" style="max-width: 100%; border-radius: 8px;" />`;
+        }
+        if (videoUrl) {
+            const embedUrl = convertYouTubeUrlToEmbed(videoUrl);
+            if (embedUrl) {
+                html += `<iframe width="100%" height="315" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>`;
+            }
+        }
+        setContent(prev => prev + html);
+        setImageLink("");
+        setVideoUrl("");
+    };
 
     const handleUpdate = async () => {
         if (!title || !thumbnailUrl || !content || !collectionName || !postId) {
@@ -114,6 +139,25 @@ const EditPostCollection = () => {
                 modules={quillModules}
                 style={{ minHeight: 250, marginBottom: 30 }}
             />
+
+            {/* Insert Media Section */}
+            <TextField
+                label="Image URL"
+                fullWidth
+                value={imageLink}
+                onChange={(e) => setImageLink(e.target.value)}
+                sx={{ mb: 2 }}
+            />
+            <TextField
+                label="YouTube Video URL"
+                fullWidth
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                sx={{ mb: 2 }}
+            />
+            <Button variant="outlined" onClick={handleInsertMedia} sx={{ mb: 3 }}>
+                Insert Media
+            </Button>
 
             <Button variant="contained" color="primary" onClick={handleUpdate}>
                 Update Post

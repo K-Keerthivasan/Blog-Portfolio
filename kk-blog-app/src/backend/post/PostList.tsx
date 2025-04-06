@@ -22,6 +22,9 @@ import {
 
 import {useNavigate} from "react-router-dom";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { deleteDoc, doc } from "firebase/firestore";
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 
 const formatDate = (timestamp: Timestamp | null | undefined) => {
     if (!timestamp || !(timestamp instanceof Timestamp)) return "";
@@ -40,6 +43,21 @@ type PostListProps = {
 const PostList = ({collectionName}: PostListProps) => {
     const [posts, setPosts] = useState<DocumentData[]>([]);
     const navigate = useNavigate();
+    const [openDialog, setOpenDialog] = useState(false);
+    const [postToDelete, setPostToDelete] = useState<string | null>(null);
+
+    const handleDelete = async () => {
+        if (!postToDelete) return;
+        try {
+            await deleteDoc(doc(db, collectionName, postToDelete));
+            setPosts((prev) => prev.filter((post) => post.id !== postToDelete));
+            setPostToDelete(null);
+            setOpenDialog(false);
+        } catch (err) {
+            console.error("Error deleting post:", err);
+        }
+    };
+
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -68,7 +86,8 @@ const PostList = ({collectionName}: PostListProps) => {
 
                 <Grid container spacing={3}>
                     {posts.map((post) => (
-                        <Grid item xs={12} sm={6} md={4} lg={3} key={post.id}>
+
+                        <Grid size={{xs: 12, sm: 6, md: 4, lg: 3}} key={post.id} component="div">
                             <Card sx={{display: "flex", flexDirection: "column", height: "100%"}}>
                                 <CardActionArea>
                                     <CardMedia
@@ -109,15 +128,42 @@ const PostList = ({collectionName}: PostListProps) => {
                                         variant="outlined"
                                         fullWidth
                                         startIcon={<EditIcon/>}
-                                        onClick={() => navigate(`/edit/${collectionName}/${post.id}`)}
+                                        onClick={() => navigate(`/admin/edit/${collectionName}/${post.id}`)}
                                     >
                                         Edit
                                     </Button>
+                                    <Button
+                                        variant="outlined"
+                                        fullWidth
+                                        color="error"
+                                        startIcon={<DeleteIcon />}
+                                        onClick={() => {
+                                            setPostToDelete(post.id);
+                                            setOpenDialog(true);
+                                        }}
+                                    >
+                                        Delete
+                                    </Button>
                                 </Box>
+
                             </Card>
                         </Grid>
                     ))}
                 </Grid>
+
+                 <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+                    <DialogTitle>Confirm Deletion</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            Are you sure you want to delete this post? This action cannot be undone.
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+                        <Button onClick={handleDelete} color="error">Delete</Button>
+                    </DialogActions>
+                </Dialog>
+
             </Container>
         </Box>
     );

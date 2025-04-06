@@ -3,7 +3,7 @@ import {JSX, useState} from "react";
 import {ThemeProvider, CssBaseline, Box} from "@mui/material";
 import './App.css'
 import Navbar from "./frontend/Navbar.tsx";
-import Home from "./frontend/Home.tsx";
+import Home from "./frontend/home/Home.tsx";
 import Footer from "./frontend/Footer.tsx";
 import {darkTheme, lightTheme} from "./frontend/theme.tsx";
 import ThemeTesterText from "./frontend/Testing/ThemeTesterText.tsx";
@@ -19,11 +19,12 @@ import EditPostCollection from "./backend/post/EditPostCollection.tsx";
 import GameDevPostAdmin from "./backend/post/tech/GameDevPostAdmin.tsx";
 import VFXPostAdmin from "./backend/post/film/VFXPostAdmin.tsx";
 import EditingPostAdmin from "./backend/post/film/EditingPostAdmin.tsx";
- import WebDevPostDetails from "./frontend/pages/WebDevPostDetails.tsx";
 import PostListPublic from "./frontend/pages/PostListPublic.tsx";
 import PostDetailsPublic from "./frontend/pages/PostDetailsPublic.tsx"; // adjust path
 
-
+//#TODO Code bar option in the post
+//#TODO Figure out a way to upload diagram in the post as well
+//#TODO Users Option
 // Add this once globally (e.g. in main.tsx or index.tsx)
 document.addEventListener(
     "touchstart",
@@ -71,6 +72,10 @@ function App() {
                             <Route path="/design-tester" element={<ComponentsTester />} />
 
                             {/* Public Blog List Routes */}
+
+                            <Route path="/blog/:id" element={<PostDetailsPublic />} />
+
+
                             <Route path="/web-dev" element={<PostListPublic collectionName="web_dev_collection" />} />
                             <Route path="/game-dev" element={<PostListPublic collectionName="game_dev_collection" />} />
                             <Route path="/editing" element={<PostListPublic collectionName="editing_collection" />} />
@@ -84,11 +89,14 @@ function App() {
                             {/* Protected Admin Routes */}
                             <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
                             <Route path="/admin/create-post" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
-                            <Route path="/edit/:collectionName/:postId" element={<ProtectedRoute><EditPostCollection /></ProtectedRoute>} />
+                            <Route path="/admin/edit/:collectionName/:postId" element={<ProtectedRoute><EditPostCollection /></ProtectedRoute>} />
                             <Route path="/admin/web-dev-post" element={<ProtectedRoute><WebDevPostAdmin /></ProtectedRoute>} />
                             <Route path="/admin/game-dev-post" element={<ProtectedRoute><GameDevPostAdmin /></ProtectedRoute>} />
                             <Route path="/admin/vfx-post" element={<ProtectedRoute><VFXPostAdmin /></ProtectedRoute>} />
                             <Route path="/admin/editing-post" element={<ProtectedRoute><EditingPostAdmin /></ProtectedRoute>} />
+
+
+
                         </Routes>
                     </Box>
 

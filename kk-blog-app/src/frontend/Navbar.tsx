@@ -40,13 +40,13 @@ const navItems = [
 
 // Sidebar drawer sections
 const techItems = [
-    {name: "Web Dev", icon: <WebIcon/>},
-    {name: "Game Dev", icon: <SportsEsportsIcon/>},
+    {name: "Web Dev", icon: <WebIcon/>, link: "/web-dev"},
+    {name: "Game Dev", icon: <SportsEsportsIcon/>, link: "/game-dev"},
 ];
 
 const filmItems = [
-    {name: "Editing", icon: <MovieFilterIcon/>},
-    {name: "VFX", icon: <BrushIcon/>},
+    {name: "Editing", icon: <MovieFilterIcon/>, link: "/editing"},
+    {name: "VFX", icon: <BrushIcon/>,link: "/vfx"},
 ];
 
 
@@ -128,7 +128,7 @@ const Navbar = ({toggleTheme, isDarkMode}: NavbarProps) => {
                                     <ListItemButton
                                         key={item.name}
                                         component={Link}
-                                        to={`/${item.name.toLowerCase().replace(" ", "-")}`}
+                                        to={item.link}
                                     >
                                         <ListItemIcon>{item.icon}</ListItemIcon>
                                         <ListItemText primary={item.name} />
@@ -154,7 +154,11 @@ const Navbar = ({toggleTheme, isDarkMode}: NavbarProps) => {
 
                             <List>
                                 {filmItems.map((item) => (
-                                    <ListItemButton key={item.name}>
+                                    <ListItemButton
+                                        key={item.name}
+                                        component={Link}
+                                        to={item.link}
+                                    >
                                         <ListItemIcon>{item.icon}</ListItemIcon>
                                         <ListItemText primary={item.name} />
                                     </ListItemButton>

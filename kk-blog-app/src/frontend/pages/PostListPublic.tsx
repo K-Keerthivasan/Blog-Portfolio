@@ -61,36 +61,37 @@ const PostListPublic = ({ collectionName }: PostPublicProps) => {
             <Grid container spacing={5} direction="column">
                 {posts.map((post) => {
                     const authorName =
-                        typeof post.author === "object"
-                            ? post.author.username || "Unknown"
-                            : post.author || "Unknown";
+                        typeof post.author === "object" && post.author?.username
+                            ? post.author.username
+                            : "Unknown";
 
-                    const avatarInitial =
-                        typeof post.author === "object"
-                            ? post.author.username?.[0]?.toUpperCase()
-                            : post.author?.[0]?.toUpperCase();
+                    const avatarInitial = authorName[0]?.toUpperCase() || "U";
+
 
                     return (
-                        <Grid item key={post.id}>
+                        <Grid key={post.id}>
                             <Link
                                 to={`/${collectionName.replace("_collection", "")}/${post.id}`}
                                 style={{ textDecoration: "none", color: "inherit" }}
                             >
-                                <Grid container spacing={3} alignItems="center">
-                                    <Grid item xs={12} md={4}>
+                                <Grid container spacing={3} alignItems="center" sx={{ flexWrap: "nowrap" }}>
+                                    {/* Thumbnail on the left */}
+                                    <Grid size={{ xs: 12, md: 4 }}>
                                         <img
                                             src={post.thumbnailUrl}
                                             alt={post.title}
                                             style={{
-                                                width: "100%",
+                                                width: "80%",
                                                 borderRadius: 8,
                                                 objectFit: "cover",
-                                                maxHeight: 200,
+                                                maxHeight: 180,
+                                                height: "100%",
                                             }}
                                         />
                                     </Grid>
 
-                                    <Grid item xs={12} md={8}>
+                                    {/* Post details on the right */}
+                                    <Grid size={{ xs: 12, md: 8 }}>
                                         <Stack spacing={1}>
                                             <Typography
                                                 variant="caption"
@@ -111,19 +112,11 @@ const PostListPublic = ({ collectionName }: PostPublicProps) => {
                                                 {post.title}
                                             </Typography>
 
-                                            <Stack
-                                                direction="row"
-                                                alignItems="center"
-                                                spacing={1}
-                                                sx={{ pt: 1 }}
-                                            >
-                                                <Avatar sx={{ width: 28, height: 28 }}>
-                                                    {avatarInitial || "U"}
+                                            <Stack direction="row" alignItems="center" spacing={1}>
+                                                <Avatar sx={{ width: 32, height: 32 }}>
+                                                    {avatarInitial}
                                                 </Avatar>
-                                                <Typography
-                                                    variant="body2"
-                                                    fontWeight={500}
-                                                >
+                                                <Typography fontWeight={500}>
                                                     {authorName}
                                                 </Typography>
                                                 <Typography
@@ -140,6 +133,8 @@ const PostListPublic = ({ collectionName }: PostPublicProps) => {
                             </Link>
                             <Divider sx={{ my: 4 }} />
                         </Grid>
+
+
                     );
                 })}
             </Grid>

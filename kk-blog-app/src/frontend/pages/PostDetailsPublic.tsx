@@ -65,14 +65,12 @@ const PostDetailsPublic = () => {
     }
 
     const authorName =
-        typeof post.author === "string"
-            ? post.author
-            : post.author?.username || "Unknown";
+        typeof post.author === "object" && post.author?.username
+            ? post.author.username
+            : "Unknown";
 
-    const authorInitial =
-        typeof post.author === "string"
-            ? post.author[0]?.toUpperCase()
-            : post.author?.username?.[0]?.toUpperCase();
+    const authorInitial = authorName[0]?.toUpperCase() || "U";
+
 
     return (
         <Box sx={{ px: { xs: 2, sm: 4 }, py: 4 }}>

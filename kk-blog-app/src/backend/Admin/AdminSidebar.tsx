@@ -28,7 +28,7 @@ type Props = {
     setPage: (page: string) => void;
 };
 
-const AdminSidebar = ({currentPage, setPage}: Props) => {
+const AdminSidebar = ({}: Props) => {
     const [openPostManager, setOpenPostManager] = useState(false);
     const location = useLocation();
 

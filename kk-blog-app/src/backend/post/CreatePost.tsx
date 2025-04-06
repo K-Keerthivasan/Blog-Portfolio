@@ -12,17 +12,53 @@ import { db } from "../firebaseConfig";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
-// 🔧 Rich Text Editor Config
-const quillModules = {
-    toolbar: [
-        [{ header: [1, 2, 3, false] }],
-        ["bold", "italic", "underline", "strike"],
-        [{ list: "ordered" }, { list: "bullet" }],
-        [{ align: [] }],
-        ["link", "image"], // Only supports pasting image links (no upload)
-        ["clean"],
-    ],
+const convertYouTubeUrlToEmbed = (url: string): string | null => {
+    const match = url.match(
+        /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/
+    );
+    if (!match) return null;
+    const videoId = match[1];
+    return `<iframe width="100%" height="315" src="https://www.youtube.com/embed/${videoId}" 
+        frameborder="0" allowfullscreen></iframe>`;
 };
+
+
+const quillModules = {
+    toolbar: {
+        container: [
+            [{ header: [1, 2, 3, false] }],
+            ["bold", "italic", "underline", "strike"],
+            [{ list: "ordered" }, { list: "bullet" }],
+            [{ align: [] }],
+            ["link", "image", "video"],
+            ["clean"],
+        ],
+        handlers: {
+            image: function (this: any) {
+                const url = prompt("Enter Image URL:");
+                if (url) {
+                    const range = this.quill.getSelection();
+                    this.quill.insertEmbed(range?.index || 0, "image", url);
+                }
+            },
+            video: function (this: any) {
+                const url = prompt("Enter YouTube video URL:");
+                if (!url) return; // ✅ skip if user cancels
+
+                const embed = convertYouTubeUrlToEmbed(url);
+                if (embed) {
+                    const range = this.quill.getSelection();
+                    this.quill.clipboard.dangerouslyPasteHTML(range?.index || 0, embed);
+                } else {
+                    alert("Invalid YouTube URL");
+                }
+            }
+
+        },
+    },
+};
+
+
 
 // 🏷️ Categories for selection
 const categories = [
