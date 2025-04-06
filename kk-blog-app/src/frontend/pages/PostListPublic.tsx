@@ -81,7 +81,7 @@ const PostListPublic = ({ collectionName }: PostPublicProps) => {
                                             src={post.thumbnailUrl}
                                             alt={post.title}
                                             style={{
-                                                width: "80%",
+                                                width: "50%",
                                                 borderRadius: 8,
                                                 objectFit: "cover",
                                                 maxHeight: 180,

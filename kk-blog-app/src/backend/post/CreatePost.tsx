@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import {
     Box,
     TextField,
@@ -6,6 +6,10 @@ import {
     MenuItem,
     Typography,
     Paper,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
 } from "@mui/material";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebaseConfig";
@@ -16,51 +20,10 @@ const convertYouTubeUrlToEmbed = (url: string): string | null => {
     const match = url.match(
         /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/
     );
-    if (!match) return null;
-    const videoId = match[1];
-    return `<iframe width="100%" height="315" src="https://www.youtube.com/embed/${videoId}" 
-        frameborder="0" allowfullscreen></iframe>`;
+    return match ? `<iframe width="100%" height="315" src="https://www.youtube.com/embed/${match[1]}" 
+        frameborder="0" allowfullscreen></iframe>` : null;
 };
 
-
-const quillModules = {
-    toolbar: {
-        container: [
-            [{ header: [1, 2, 3, false] }],
-            ["bold", "italic", "underline", "strike"],
-            [{ list: "ordered" }, { list: "bullet" }],
-            [{ align: [] }],
-            ["link", "image", "video"],
-            ["clean"],
-        ],
-        handlers: {
-            image: function (this: any) {
-                const url = prompt("Enter Image URL:");
-                if (url) {
-                    const range = this.quill.getSelection();
-                    this.quill.insertEmbed(range?.index || 0, "image", url);
-                }
-            },
-            video: function (this: any) {
-                const url = prompt("Enter YouTube video URL:");
-                if (!url) return; // ✅ skip if user cancels
-
-                const embed = convertYouTubeUrlToEmbed(url);
-                if (embed) {
-                    const range = this.quill.getSelection();
-                    this.quill.clipboard.dangerouslyPasteHTML(range?.index || 0, embed);
-                } else {
-                    alert("Invalid YouTube URL");
-                }
-            }
-
-        },
-    },
-};
-
-
-
-// 🏷️ Categories for selection
 const categories = [
     { value: "web_dev_collection", label: "Web Dev" },
     { value: "game_dev_collection", label: "Game Dev" },
@@ -73,8 +36,65 @@ const CreatePost = () => {
     const [thumbnailUrl, setThumbnailUrl] = useState("");
     const [content, setContent] = useState("");
     const [category, setCategory] = useState(categories[0].value);
+    const [imageDialogOpen, setImageDialogOpen] = useState(false);
+    const [videoDialogOpen, setVideoDialogOpen] = useState(false);
+    const [imageUrl, setImageUrl] = useState("");
+    const [videoUrl, setVideoUrl] = useState("");
+    const quillRef = useRef<ReactQuill>(null);
 
+    const quillModules = useMemo(() => ({
+        toolbar: {
+            container: [
+                [{ header: [1, 2, 3, false] }],
+                ["bold", "italic", "underline", "strike", "code-block"],
+                [{ list: "ordered" }, { list: "bullet" }],
+                [{ align: [] }],
+                ["link", "image", "video", "code"],
+                ["clean"],
+            ],
+            handlers: {
+                image: () => setImageDialogOpen(true),
+                video: () => setVideoDialogOpen(true),
+                code: function(this: any) {
+                    const code = prompt("Paste your code:");
+                    if (code && quillRef.current) {
+                        const editor = quillRef.current.getEditor();
+                        const range = editor.getSelection();
+                        editor.insertText(range?.index || 0, "\n");
+                        editor.clipboard.dangerouslyPasteHTML(
+                            range?.index || 0,
+                            `<pre class="ql-syntax" spellcheck="false">${code}</pre>`
+                        );
+                    }
+                }
+            }
+        },
+    }), []);
 
+    const handleInsertImage = () => {
+        if (quillRef.current && imageUrl) {
+            const editor = quillRef.current.getEditor();
+            const range = editor.getSelection();
+            editor.insertEmbed(range?.index || 0, "image", imageUrl, "user");
+        }
+        setImageDialogOpen(false);
+        setImageUrl("");
+    };
+
+    const handleInsertVideo = () => {
+        if (quillRef.current) {
+            const editor = quillRef.current.getEditor();
+            const embed = convertYouTubeUrlToEmbed(videoUrl);
+            if (embed) {
+                const range = editor.getSelection();
+                editor.clipboard.dangerouslyPasteHTML(range?.index || 0, embed);
+            } else {
+                alert("Invalid YouTube URL");
+            }
+        }
+        setVideoDialogOpen(false);
+        setVideoUrl("");
+    };
 
     const handleSubmit = async () => {
         if (!title || !thumbnailUrl || !content) {
@@ -90,10 +110,9 @@ const CreatePost = () => {
                 createdAt: serverTimestamp(),
                 author: {
                     email: "kkvasan99@gmail.com",
-                    username: "keerthi", // 👈 add your preferred name here
+                    username: "keerthi",
                 },
             });
-
 
             alert("Post published!");
             setTitle("");
@@ -120,7 +139,7 @@ const CreatePost = () => {
                 sx={{ mb: 2 }}
             />
 
-            {/* Thumbnail Image URL */}
+            {/* Thumbnail Input */}
             <TextField
                 label="Thumbnail Image URL"
                 fullWidth
@@ -140,7 +159,7 @@ const CreatePost = () => {
                 </Paper>
             )}
 
-            {/* Category Dropdown */}
+            {/* Category Select */}
             <TextField
                 select
                 label="Category"
@@ -156,14 +175,61 @@ const CreatePost = () => {
                 ))}
             </TextField>
 
+            {/* Image URL Dialog */}
+            <Dialog open={imageDialogOpen} onClose={() => setImageDialogOpen(false)}>
+                <DialogTitle>Insert Image URL</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Image URL"
+                        fullWidth
+                        variant="standard"
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setImageDialogOpen(false)}>Cancel</Button>
+                    <Button onClick={handleInsertImage}>Insert</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* YouTube URL Dialog */}
+            <Dialog open={videoDialogOpen} onClose={() => setVideoDialogOpen(false)}>
+                <DialogTitle>Insert YouTube URL</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="YouTube URL"
+                        fullWidth
+                        variant="standard"
+                        value={videoUrl}
+                        onChange={(e) => setVideoUrl(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setVideoDialogOpen(false)}>Cancel</Button>
+                    <Button onClick={handleInsertVideo}>Insert</Button>
+                </DialogActions>
+            </Dialog>
+
             {/* Rich Text Editor */}
             <ReactQuill
+                ref={quillRef}
                 theme="snow"
                 value={content}
                 onChange={setContent}
                 modules={quillModules}
                 placeholder="Write your blog content here..."
-                style={{ minHeight: "250px", marginBottom: "30px" }}
+                style={{ minHeight: "400px", marginBottom: "30px" }}
+                formats={[
+                    "header",
+                    "bold", "italic", "underline", "strike",
+                    "list", "bullet",
+                    "link", "image", "video", "code-block"
+                ]}
             />
 
             {/* Submit Button */}
@@ -171,7 +237,8 @@ const CreatePost = () => {
                 variant="contained"
                 color="primary"
                 onClick={handleSubmit}
-                sx={{ fontWeight: "bold" }}
+                sx={{ fontWeight: "bold", mt: 3, mb: 6 }}
+                size="large"
             >
                 Publish Post
             </Button>

@@ -22,9 +22,7 @@ import EditingPostAdmin from "./backend/post/film/EditingPostAdmin.tsx";
 import PostListPublic from "./frontend/pages/PostListPublic.tsx";
 import PostDetailsPublic from "./frontend/pages/PostDetailsPublic.tsx"; // adjust path
 
-//#TODO Code bar option in the post
-//#TODO Figure out a way to upload diagram in the post as well
-//#TODO Users Option
+ //#TODO Users Option
 // Add this once globally (e.g. in main.tsx or index.tsx)
 document.addEventListener(
     "touchstart",

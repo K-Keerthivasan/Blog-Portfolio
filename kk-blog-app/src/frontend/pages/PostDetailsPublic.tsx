@@ -1,28 +1,46 @@
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { doc, getDoc, Timestamp } from "firebase/firestore";
-import { db } from "../../backend/firebaseConfig";
+import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { doc, getDoc, Timestamp } from 'firebase/firestore';
+import { db } from '../../backend/firebaseConfig';
 import {
     Box,
     Typography,
     Avatar,
     Stack,
     CircularProgress,
-} from "@mui/material";
+    IconButton,
+    Tooltip,
+} from '@mui/material';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import parse from 'html-react-parser';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-const formatDate = (timestamp: Timestamp | null | undefined) => {
-    if (!timestamp || !(timestamp instanceof Timestamp)) return "";
+interface PostData {
+    id: string;
+    title: string;
+    content: string;
+    thumbnailUrl?: string;
+    createdAt: Timestamp;
+    author?: {
+        username: string;
+        email: string;
+    };
+}
+
+const formatDate = (timestamp: Timestamp | null | undefined): string => {
+    if (!timestamp || !(timestamp instanceof Timestamp)) return '';
     const date = timestamp.toDate();
-    return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
     });
 };
 
 const PostDetailsPublic = () => {
-    const { collection, id } = useParams(); // URL: /:collection/:id
-    const [post, setPost] = useState<any>(null);
+    const { collection, id } = useParams<{ collection: string; id: string }>();
+    const [post, setPost] = useState<PostData | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -34,12 +52,20 @@ const PostDetailsPublic = () => {
                 const snap = await getDoc(ref);
 
                 if (snap.exists()) {
-                    setPost({ id: snap.id, ...snap.data() });
+                    const postData = snap.data();
+                    setPost({
+                        id: snap.id,
+                        title: postData.title,
+                        content: postData.content,
+                        thumbnailUrl: postData.thumbnailUrl,
+                        createdAt: postData.createdAt,
+                        author: postData.author,
+                    });
                 } else {
-                    console.warn("⚠️ Post not found.");
+                    console.warn('Post not found.');
                 }
             } catch (error) {
-                console.error("❌ Error fetching post:", error);
+                console.error('Error fetching post:', error);
             } finally {
                 setLoading(false);
             }
@@ -48,9 +74,56 @@ const PostDetailsPublic = () => {
         fetchPost();
     }, [collection, id]);
 
+    const handleCopy = (code: string) => {
+        navigator.clipboard.writeText(code);
+    };
+
+    const processContent = (content: string) => {
+        return parse(content || '<p>No content available.</p>', {
+            replace: (domNode: any) => {
+                if (domNode.name === 'pre' && domNode.attribs?.class === 'ql-syntax') {
+                    const code = domNode.children[0]?.data || '';
+                    return (
+                        <Box sx={{ position: 'relative', my: 3 }}>
+                            <Tooltip title="Copy Code">
+                                <IconButton
+                                    sx={{
+                                        position: 'absolute',
+                                        right: 8,
+                                        top: 8,
+                                        zIndex: 1,
+                                        backgroundColor: 'rgba(255,255,255,0.1)',
+                                        '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' },
+                                    }}
+                                    onClick={() => handleCopy(code)}
+                                >
+                                    <ContentCopyIcon fontSize="small" sx={{ color: '#fff' }} />
+                                </IconButton>
+                            </Tooltip>
+                            <SyntaxHighlighter
+                                language="javascript"
+                                style={vscDarkPlus}
+                                customStyle={{
+                                    borderRadius: 8,
+                                    padding: 16,
+                                    margin: 0,
+                                    fontSize: '0.9rem',
+                                    background: '#1e1e1e',
+                                }}
+                            >
+                                {code}
+                            </SyntaxHighlighter>
+                        </Box>
+                    );
+                }
+                return domNode;
+            },
+        });
+    };
+
     if (loading) {
         return (
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
                 <CircularProgress />
             </Box>
         );
@@ -58,19 +131,12 @@ const PostDetailsPublic = () => {
 
     if (!post) {
         return (
-            <Typography sx={{ mt: 5, textAlign: "center" }}>
-                Post not found.
-            </Typography>
+            <Typography sx={{ mt: 5, textAlign: 'center' }}>Post not found.</Typography>
         );
     }
 
-    const authorName =
-        typeof post.author === "object" && post.author?.username
-            ? post.author.username
-            : "Unknown";
-
-    const authorInitial = authorName[0]?.toUpperCase() || "U";
-
+    const authorName = post.author?.username || 'Unknown';
+    const authorInitial = authorName[0]?.toUpperCase() || 'U';
 
     return (
         <Box sx={{ px: { xs: 2, sm: 4 }, py: 4 }}>
@@ -79,11 +145,11 @@ const PostDetailsPublic = () => {
                     src={post.thumbnailUrl}
                     alt={post.title}
                     style={{
-                        width: "100%",
+                        width: '100%',
                         borderRadius: 8,
                         maxHeight: 400,
-                        objectFit: "cover",
-                        marginBottom: "30px",
+                        objectFit: 'cover',
+                        marginBottom: '30px',
                     }}
                 />
             )}
@@ -95,7 +161,7 @@ const PostDetailsPublic = () => {
             <Stack direction="row" alignItems="center" spacing={1} sx={{ pt: 2 }}>
                 <Avatar sx={{ width: 32, height: 32 }}>{authorInitial}</Avatar>
                 <Typography fontWeight={500}>{authorName}</Typography>
-                <Typography color="text.secondary" sx={{ ml: "auto" }}>
+                <Typography color="text.secondary" sx={{ ml: 'auto' }}>
                     {formatDate(post.createdAt)}
                 </Typography>
             </Stack>
@@ -105,12 +171,12 @@ const PostDetailsPublic = () => {
                     mt: 4,
                     fontSize: 18,
                     lineHeight: 1.8,
-                    "& img": { maxWidth: "100%", borderRadius: 4 },
+                    '& img': { maxWidth: '100%', borderRadius: 4, my: 2 },
+                    '& iframe': { width: '100%', height: 400, my: 2 },
                 }}
-                dangerouslySetInnerHTML={{
-                    __html: post.content || "<p>No content available.</p>",
-                }}
-            />
+            >
+                {processContent(post.content || '')}
+            </Box>
         </Box>
     );
 };
