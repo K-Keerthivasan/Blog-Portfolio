@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import {
     Box,
     TextField,
@@ -40,7 +40,50 @@ const CreatePost = () => {
     const [videoDialogOpen, setVideoDialogOpen] = useState(false);
     const [imageUrl, setImageUrl] = useState("");
     const [videoUrl, setVideoUrl] = useState("");
+    const [insertIndex, setInsertIndex] = useState<number | null>(null);
     const quillRef = useRef<ReactQuill>(null);
+
+    // Markdown shortcut listener
+    useEffect(() => {
+        if (!quillRef.current) return;
+        const editor = quillRef.current.getEditor();
+        const container = quillRef.current?.editor?.root;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === " " || e.key === "Enter") {
+                const selection = editor.getSelection();
+                if (!selection) return;
+
+                const [line] = editor.getLine(selection.index);
+                const lineText = line.domNode?.textContent?.trim();
+
+                if (lineText === "/image") {
+                    e.preventDefault();
+                    setInsertIndex(selection.index - 6);
+                    editor.deleteText(selection.index - 6, 6);
+                    setImageDialogOpen(true);
+                } else if (lineText === "/video") {
+                    e.preventDefault();
+                    setInsertIndex(selection.index - 6);
+                    editor.deleteText(selection.index - 6, 6);
+                    setVideoDialogOpen(true);
+                } else if (lineText === "/code") {
+                    e.preventDefault();
+                    editor.deleteText(selection.index - 5, 5);
+                    const code = prompt("Paste your code:");
+                    if (code) {
+                        editor.clipboard.dangerouslyPasteHTML(selection.index - 5, `<pre class="ql-syntax">${code}</pre>`);
+                        editor.setSelection(selection.index + code.length, 0);
+                    }
+                }
+            }
+        };
+
+        container?.addEventListener("keydown", handleKeyDown);
+        return () => {
+            container?.removeEventListener("keydown", handleKeyDown);
+        };
+    }, []);
 
     const quillModules = useMemo(() => ({
         toolbar: {
@@ -55,45 +98,50 @@ const CreatePost = () => {
             handlers: {
                 image: () => setImageDialogOpen(true),
                 video: () => setVideoDialogOpen(true),
-                code: function(this: any) {
+                code: function (this: any) {
                     const code = prompt("Paste your code:");
                     if (code && quillRef.current) {
                         const editor = quillRef.current.getEditor();
                         const range = editor.getSelection();
-                        editor.insertText(range?.index || 0, "\n");
-                        editor.clipboard.dangerouslyPasteHTML(
-                            range?.index || 0,
-                            `<pre class="ql-syntax" spellcheck="false">${code}</pre>`
-                        );
+                        if (range) {
+                            editor.insertText(range.index, "\n");
+                            editor.clipboard.dangerouslyPasteHTML(
+                                range.index + 1,
+                                `<pre class="ql-syntax" spellcheck="false">${code}</pre>`
+                            );
+                            editor.setSelection(range.index + code.length + 2, 0);
+                        }
                     }
                 }
             }
-        },
+        }
     }), []);
 
     const handleInsertImage = () => {
-        if (quillRef.current && imageUrl) {
+        if (quillRef.current && imageUrl && insertIndex !== null) {
             const editor = quillRef.current.getEditor();
-            const range = editor.getSelection();
-            editor.insertEmbed(range?.index || 0, "image", imageUrl, "user");
+            editor.insertEmbed(insertIndex, "image", imageUrl, "user");
+            editor.setSelection(insertIndex + 1, 0);
         }
         setImageDialogOpen(false);
         setImageUrl("");
+        setInsertIndex(null);
     };
 
     const handleInsertVideo = () => {
-        if (quillRef.current) {
+        if (quillRef.current && videoUrl && insertIndex !== null) {
             const editor = quillRef.current.getEditor();
             const embed = convertYouTubeUrlToEmbed(videoUrl);
             if (embed) {
-                const range = editor.getSelection();
-                editor.clipboard.dangerouslyPasteHTML(range?.index || 0, embed);
+                editor.clipboard.dangerouslyPasteHTML(insertIndex, embed);
+                editor.setSelection(insertIndex + 1, 0);
             } else {
                 alert("Invalid YouTube URL");
             }
         }
         setVideoDialogOpen(false);
         setVideoUrl("");
+        setInsertIndex(null);
     };
 
     const handleSubmit = async () => {
@@ -130,7 +178,6 @@ const CreatePost = () => {
                 Create a New Blog Post
             </Typography>
 
-            {/* Title Input */}
             <TextField
                 label="Post Title"
                 fullWidth
@@ -139,7 +186,6 @@ const CreatePost = () => {
                 sx={{ mb: 2 }}
             />
 
-            {/* Thumbnail Input */}
             <TextField
                 label="Thumbnail Image URL"
                 fullWidth
@@ -148,7 +194,6 @@ const CreatePost = () => {
                 sx={{ mb: 2 }}
             />
 
-            {/* Thumbnail Preview */}
             {thumbnailUrl && (
                 <Paper elevation={3} sx={{ mb: 3 }}>
                     <img
@@ -159,7 +204,6 @@ const CreatePost = () => {
                 </Paper>
             )}
 
-            {/* Category Select */}
             <TextField
                 select
                 label="Category"
@@ -175,7 +219,7 @@ const CreatePost = () => {
                 ))}
             </TextField>
 
-            {/* Image URL Dialog */}
+            {/* Image Dialog */}
             <Dialog open={imageDialogOpen} onClose={() => setImageDialogOpen(false)}>
                 <DialogTitle>Insert Image URL</DialogTitle>
                 <DialogContent>
@@ -195,7 +239,7 @@ const CreatePost = () => {
                 </DialogActions>
             </Dialog>
 
-            {/* YouTube URL Dialog */}
+            {/* Video Dialog */}
             <Dialog open={videoDialogOpen} onClose={() => setVideoDialogOpen(false)}>
                 <DialogTitle>Insert YouTube URL</DialogTitle>
                 <DialogContent>
@@ -215,7 +259,6 @@ const CreatePost = () => {
                 </DialogActions>
             </Dialog>
 
-            {/* Rich Text Editor */}
             <ReactQuill
                 ref={quillRef}
                 theme="snow"
@@ -232,7 +275,6 @@ const CreatePost = () => {
                 ]}
             />
 
-            {/* Submit Button */}
             <Button
                 variant="contained"
                 color="primary"

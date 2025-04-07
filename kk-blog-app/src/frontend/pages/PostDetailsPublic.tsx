@@ -1,7 +1,7 @@
-import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { doc, getDoc, Timestamp } from 'firebase/firestore';
-import { db } from '../../backend/firebaseConfig';
+import {useParams} from 'react-router-dom';
+import {useEffect, useState} from 'react';
+import {doc, getDoc, Timestamp} from 'firebase/firestore';
+import {db} from '../../backend/firebaseConfig';
 import {
     Box,
     Typography,
@@ -12,9 +12,9 @@ import {
     Tooltip,
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
 import parse from 'html-react-parser';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import {vscDarkPlus} from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface PostData {
     id: string;
@@ -39,7 +39,7 @@ const formatDate = (timestamp: Timestamp | null | undefined): string => {
 };
 
 const PostDetailsPublic = () => {
-    const { collection, id } = useParams<{ collection: string; id: string }>();
+    const {collection, id} = useParams<{ collection: string; id: string }>();
     const [post, setPost] = useState<PostData | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -84,7 +84,7 @@ const PostDetailsPublic = () => {
                 if (domNode.name === 'pre' && domNode.attribs?.class === 'ql-syntax') {
                     const code = domNode.children[0]?.data || '';
                     return (
-                        <Box sx={{ position: 'relative', my: 3 }}>
+                        <Box sx={{position: 'relative', my: 3}}>
                             <Tooltip title="Copy Code">
                                 <IconButton
                                     sx={{
@@ -93,11 +93,11 @@ const PostDetailsPublic = () => {
                                         top: 8,
                                         zIndex: 1,
                                         backgroundColor: 'rgba(255,255,255,0.1)',
-                                        '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' },
+                                        '&:hover': {backgroundColor: 'rgba(255,255,255,0.2)'},
                                     }}
                                     onClick={() => handleCopy(code)}
                                 >
-                                    <ContentCopyIcon fontSize="small" sx={{ color: '#fff' }} />
+                                    <ContentCopyIcon fontSize="small" sx={{color: '#fff'}}/>
                                 </IconButton>
                             </Tooltip>
                             <SyntaxHighlighter
@@ -123,15 +123,15 @@ const PostDetailsPublic = () => {
 
     if (loading) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
-                <CircularProgress />
+            <Box sx={{display: 'flex', justifyContent: 'center', mt: 5}}>
+                <CircularProgress/>
             </Box>
         );
     }
 
     if (!post) {
         return (
-            <Typography sx={{ mt: 5, textAlign: 'center' }}>Post not found.</Typography>
+            <Typography sx={{mt: 5, textAlign: 'center'}}>Post not found.</Typography>
         );
     }
 
@@ -139,43 +139,67 @@ const PostDetailsPublic = () => {
     const authorInitial = authorName[0]?.toUpperCase() || 'U';
 
     return (
-        <Box sx={{ px: { xs: 2, sm: 4 }, py: 4 }}>
-            {post.thumbnailUrl && (
-                <img
-                    src={post.thumbnailUrl}
-                    alt={post.title}
-                    style={{
-                        width: '100%',
-                        borderRadius: 8,
-                        maxHeight: 400,
-                        objectFit: 'cover',
-                        marginBottom: '30px',
-                    }}
-                />
-            )}
 
-            <Typography variant="h3" fontWeight="bold" sx={{ mt: 3 }}>
-                {post.title}
-            </Typography>
 
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ pt: 2 }}>
-                <Avatar sx={{ width: 32, height: 32 }}>{authorInitial}</Avatar>
-                <Typography fontWeight={500}>{authorName}</Typography>
-                <Typography color="text.secondary" sx={{ ml: 'auto' }}>
-                    {formatDate(post.createdAt)}
-                </Typography>
-            </Stack>
-
+        <Box
+            sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                py: 4,
+                px: {xs: 2, sm: 4},
+            }}
+        >
             <Box
                 sx={{
-                    mt: 4,
-                    fontSize: 18,
-                    lineHeight: 1.8,
-                    '& img': { maxWidth: '100%', borderRadius: 4, my: 2 },
-                    '& iframe': { width: '100%', height: 400, my: 2 },
+                    width: '100%',
+                    mx: 'auto',
+                    px: {xs: 2, sm: 3, md: 4}, // padding left/right
+                    maxWidth: {
+                        xs: '100%',      // full width for very small screens
+                        sm: '600px',     // small devices
+                        md: '960px',     // tablets / small laptops
+                        lg: '1100px',     // desktops
+                        xl: '1300px',    // large screens
+                    },
                 }}
             >
-                {processContent(post.content || '')}
+                {post.thumbnailUrl && (
+                    <img
+                        src={post.thumbnailUrl}
+                        alt={post.title}
+                        style={{
+                            width: '100%',
+                            borderRadius: 8,
+                            maxHeight: 400,
+                            objectFit: 'cover',
+                            marginBottom: '30px',
+                        }}
+                    />
+                )}
+
+                <Typography variant="h3" fontWeight="bold" sx={{mt: 3}}>
+                    {post.title}
+                </Typography>
+
+                <Stack direction="row" alignItems="center" spacing={1} sx={{pt: 2}}>
+                    <Avatar sx={{width: 32, height: 32}}>{authorInitial}</Avatar>
+                    <Typography fontWeight={500}>{authorName}</Typography>
+                    <Typography color="text.secondary" sx={{ml: 'auto'}}>
+                        {formatDate(post.createdAt)}
+                    </Typography>
+                </Stack>
+
+                <Box
+                    sx={{
+                        mt: 4,
+                        fontSize: 18,
+                        lineHeight: 1.8,
+                        '& img': {maxWidth: '100%', borderRadius: 4, my: 2},
+                        '& iframe': {width: '100%', height: 400, my: 2},
+                    }}
+                >
+                    {processContent(post.content || '')}
+                </Box>
             </Box>
         </Box>
     );
