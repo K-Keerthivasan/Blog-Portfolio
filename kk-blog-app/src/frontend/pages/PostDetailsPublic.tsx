@@ -15,6 +15,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
 import parse from 'html-react-parser';
 import {vscDarkPlus} from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { Helmet } from 'react-helmet-async';
 
 interface PostData {
     id: string;
@@ -176,10 +177,11 @@ const PostDetailsPublic = () => {
                         }}
                     />
                 )}
-
+                <Helmet>
                 <Typography variant="h3" fontWeight="bold" sx={{mt: 3}}>
                     {post.title}
                 </Typography>
+
 
                 <Stack direction="row" alignItems="center" spacing={1} sx={{pt: 2}}>
                     <Avatar sx={{width: 32, height: 32}}>{authorInitial}</Avatar>
@@ -200,6 +202,7 @@ const PostDetailsPublic = () => {
                 >
                     {processContent(post.content || '')}
                 </Box>
+                </Helmet>
             </Box>
         </Box>
     );
