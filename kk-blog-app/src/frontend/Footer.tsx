@@ -47,8 +47,7 @@ const Footer = () => {
                     }}
                 >
                     <a
-                        href="https://kk-dev-portfolio.web.app/"
-                        target="_blank"
+                        href="https://dev.kkvasan.ca/"
                         rel="noopener noreferrer"
                         style={{ textDecoration: "none" }}
                     >

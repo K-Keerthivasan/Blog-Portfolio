@@ -67,7 +67,7 @@ const EditPostCollection = () => {
             handlers: {
                 image: () => setImageDialogOpen(true),
                 video: () => setVideoDialogOpen(true),
-                code: function (this: any) {
+                code: () => {
                     const code = prompt("Paste your code:");
                     if (code && quillRef.current) {
                         const editor = quillRef.current.getEditor();

@@ -23,12 +23,7 @@ import {Link, useLocation} from "react-router-dom";
 
 import {useState} from "react";
 
-type Props = {
-    currentPage: string;
-    setPage: (page: string) => void;
-};
-
-const AdminSidebar = ({}: Props) => {
+const AdminSidebar = () => {
     const [openPostManager, setOpenPostManager] = useState(false);
     const location = useLocation();
 

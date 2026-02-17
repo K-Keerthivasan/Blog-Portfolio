@@ -3,14 +3,22 @@ import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 
+const requiredEnv = (name: keyof ImportMetaEnv): string => {
+    const value = import.meta.env[name];
+    if (!value) {
+        throw new Error(`Missing Firebase environment variable: ${name}`);
+    }
+    return value;
+};
+
 const firebaseConfig = {
-    apiKey: "AIzaSyC9Q8-0_jWgLH-A8Gk6bmJo_emXBlCjqGM",
-    authDomain: "kk-blog-site.firebaseapp.com",
-    projectId: "kk-blog-site",
-    storageBucket: "kk-blog-site.firebasestorage.app",
-    messagingSenderId: "829803350858",
-    appId: "1:829803350858:web:e6cf8763ee8b457df68fb3",
-    measurementId: "G-P05WPWSPE1"
+    apiKey: requiredEnv('VITE_FIREBASE_API_KEY'),
+    authDomain: requiredEnv('VITE_FIREBASE_AUTH_DOMAIN'),
+    projectId: requiredEnv('VITE_FIREBASE_PROJECT_ID'),
+    storageBucket: requiredEnv('VITE_FIREBASE_STORAGE_BUCKET'),
+    messagingSenderId: requiredEnv('VITE_FIREBASE_MESSAGING_SENDER_ID'),
+    appId: requiredEnv('VITE_FIREBASE_APP_ID'),
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);

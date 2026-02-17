@@ -14,10 +14,11 @@ import {
     ListItemButton,
 
 } from "@mui/material";
-
+import FastForwardIcon from '@mui/icons-material/FastForward';
 import AdminSidebar from "../backend/Admin/AdminSidebar.tsx"; // update path if needed
 import MenuIcon from "@mui/icons-material/Menu";
 import HomeIcon from "@mui/icons-material/Home";
+import CodeOffIcon from '@mui/icons-material/CodeOff';
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import WebIcon from "@mui/icons-material/Language";
@@ -35,7 +36,9 @@ type NavbarProps = {
 
 // Navigation links for the top-right buttons
 const navItems = [
-    {name: "Home", icon: <HomeIcon/>, link: "/"},
+    {name: "Home", icon: <HomeIcon/>, link: "/", color: "#ffffff", hoverColor: "#b3b3b3"},
+    {icon: <CodeOffIcon/>, link: "https://dev.kkvasan.ca/", color: "#0077ff", hoverColor: "#74b4ff"},
+    {icon: <FastForwardIcon/>, link: "https://film.kkvasan.ca/", color: "#ff0000", hoverColor: "#ff9292"},
 ];
 
 // Sidebar drawer sections
@@ -46,9 +49,8 @@ const techItems = [
 
 const filmItems = [
     {name: "Editing", icon: <MovieFilterIcon/>, link: "/editing"},
-    {name: "VFX", icon: <BrushIcon/>,link: "/vfx"},
+    {name: "VFX", icon: <BrushIcon/>, link: "/vfx"},
 ];
-
 
 
 const Navbar = ({toggleTheme, isDarkMode}: NavbarProps) => {
@@ -80,17 +82,65 @@ const Navbar = ({toggleTheme, isDarkMode}: NavbarProps) => {
                                 key={item.name}
                                 component={Link}
                                 to={item.link}
-                                startIcon={item.icon}
+                                disableRipple
                                 sx={{
                                     fontWeight: "bold",
                                     fontSize: "18px",
+                                    textTransform: "none",
+                                    minWidth: "unset",
+                                    px: 1.5,
+                                    py: 1,
+                                    gap: 1,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    backgroundColor: "transparent",
+                                    border: "none",
+                                    boxShadow: "none",
+                                    outline: "none",
+                                    transition: "all 0.3s ease",
+
                                     "&:hover": {
-                                        backgroundColor: "rgba(255, 255, 255, 0.1)",
+                                        backgroundColor: "transparent",
+                                    },
+                                    "&:focus, &:focusVisible": {
+                                        outline: "none",
+                                        boxShadow: "none",
+                                        backgroundColor: "transparent",
+                                    },
+
+                                    // ✨ Add hover behavior manually for icon and text
+                                    "&:hover .icon-color, &:hover .text-color": {
+                                        color: item.hoverColor,
                                     },
                                 }}
                             >
-                                {item.name}
+                                {/* Icon */}
+                                <Box
+                                    className="icon-color"
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        color: item.color,
+                                        transition: "color 0.3s ease",
+                                    }}
+                                >
+                                    {item.icon}
+                                </Box>
+
+                                {/* Text */}
+                                <Typography
+                                    className="text-color"
+                                    sx={{
+                                        color: item.color,
+                                        fontWeight: "bold",
+                                        transition: "color 0.3s ease",
+                                    }}
+                                >
+                                    {item.name}
+                                </Typography>
                             </Button>
+
+
                         ))}
 
                         <Tooltip title="Toggle light/dark mode">
@@ -104,9 +154,9 @@ const Navbar = ({toggleTheme, isDarkMode}: NavbarProps) => {
 
             {/* Sidebar Drawer */}
             <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
-                <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
+                <Box sx={{width: 250}} role="presentation" onClick={toggleDrawer(false)}>
                     {isAdminRoute ? (
-                        <AdminSidebar currentPage={"dashboard"} setPage={() => {}} />
+                        <AdminSidebar />
                     ) : (
                         <>
                             {/* Tech Section */}
@@ -131,12 +181,12 @@ const Navbar = ({toggleTheme, isDarkMode}: NavbarProps) => {
                                         to={item.link}
                                     >
                                         <ListItemIcon>{item.icon}</ListItemIcon>
-                                        <ListItemText primary={item.name} />
+                                        <ListItemText primary={item.name}/>
                                     </ListItemButton>
                                 ))}
                             </List>
 
-                            <Divider />
+                            <Divider/>
 
                             {/* Film Section */}
                             <Typography
@@ -160,7 +210,7 @@ const Navbar = ({toggleTheme, isDarkMode}: NavbarProps) => {
                                         to={item.link}
                                     >
                                         <ListItemIcon>{item.icon}</ListItemIcon>
-                                        <ListItemText primary={item.name} />
+                                        <ListItemText primary={item.name}/>
                                     </ListItemButton>
                                 ))}
                             </List>
@@ -174,3 +224,4 @@ const Navbar = ({toggleTheme, isDarkMode}: NavbarProps) => {
 };
 
 export default Navbar;
+

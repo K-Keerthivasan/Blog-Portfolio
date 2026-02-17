@@ -13,9 +13,9 @@ import {
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
-import parse from 'html-react-parser';
+import parse, {DOMNode, Element} from 'html-react-parser';
 import {vscDarkPlus} from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Helmet } from 'react-helmet-async';
+import {Helmet} from 'react-helmet-async';
 
 interface PostData {
     id: string;
@@ -81,9 +81,10 @@ const PostDetailsPublic = () => {
 
     const processContent = (content: string) => {
         return parse(content || '<p>No content available.</p>', {
-            replace: (domNode: any) => {
-                if (domNode.name === 'pre' && domNode.attribs?.class === 'ql-syntax') {
-                    const code = domNode.children[0]?.data || '';
+            replace: (domNode: DOMNode) => {
+                if (domNode instanceof Element && domNode.name === 'pre' && domNode.attribs?.class === 'ql-syntax') {
+                    const firstChild = domNode.children[0];
+                    const code = firstChild && 'data' in firstChild ? firstChild.data : '';
                     return (
                         <Box sx={{position: 'relative', my: 3}}>
                             <Tooltip title="Copy Code">
@@ -140,8 +141,6 @@ const PostDetailsPublic = () => {
     const authorInitial = authorName[0]?.toUpperCase() || 'U';
 
     return (
-
-
         <Box
             sx={{
                 display: 'flex',
@@ -154,13 +153,13 @@ const PostDetailsPublic = () => {
                 sx={{
                     width: '100%',
                     mx: 'auto',
-                    px: {xs: 2, sm: 3, md: 4}, // padding left/right
+                    px: {xs: 2, sm: 3, md: 4},
                     maxWidth: {
-                        xs: '100%',      // full width for very small screens
-                        sm: '600px',     // small devices
-                        md: '960px',     // tablets / small laptops
-                        lg: '1100px',     // desktops
-                        xl: '1300px',    // large screens
+                        xs: '100%',
+                        sm: '600px',
+                        md: '960px',
+                        lg: '1100px',
+                        xl: '1300px',
                     },
                 }}
             >
@@ -178,10 +177,13 @@ const PostDetailsPublic = () => {
                     />
                 )}
                 <Helmet>
+                    <title>{post.title}</title>
+                    <meta name="description" content={post.content?.slice(0, 150)}/>
+                </Helmet>
+
                 <Typography variant="h3" fontWeight="bold" sx={{mt: 3}}>
                     {post.title}
                 </Typography>
-
 
                 <Stack direction="row" alignItems="center" spacing={1} sx={{pt: 2}}>
                     <Avatar sx={{width: 32, height: 32}}>{authorInitial}</Avatar>
@@ -202,7 +204,6 @@ const PostDetailsPublic = () => {
                 >
                     {processContent(post.content || '')}
                 </Box>
-                </Helmet>
             </Box>
         </Box>
     );
